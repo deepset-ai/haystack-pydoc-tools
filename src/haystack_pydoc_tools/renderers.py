@@ -1,17 +1,15 @@
+import base64
+import dataclasses
 import os
 import sys
-import io
-import dataclasses
 import typing as t
-import base64
 import warnings
 from pathlib import Path
 
-import requests
 import docspec
-from pydoc_markdown.interfaces import Context, Renderer
+import requests
 from pydoc_markdown.contrib.renderers.markdown import MarkdownRenderer
-
+from pydoc_markdown.interfaces import Context, Renderer
 
 README_FRONTMATTER = """---
 title: {title}
@@ -30,8 +28,8 @@ def create_headers(version: str):
     # Utility function to create Readme.io headers.
     # We assume the README_API_KEY env var is set since we check outside
     # to show clearer error messages.
-    README_API_KEY = os.getenv("README_API_KEY")
-    token = base64.b64encode(f"{README_API_KEY}:".encode()).decode()
+    api_key = os.getenv("README_API_KEY")
+    token = base64.b64encode(f"{api_key}:".encode()).decode()
     return {"authorization": f"Basic {token}", "x-readme-version": version}
 
 
@@ -78,9 +76,9 @@ class ReadmeRenderer(Renderer):
         README_API_KEY env var must be set to correctly get the categories.
         Returns dictionary containing all the categories slugs and their ids.
         """
-        README_API_KEY = os.getenv("README_API_KEY")
-        if not README_API_KEY:
-            warnings.warn("README_API_KEY env var is not set, using a placeholder category ID")
+        api_key = os.getenv("README_API_KEY")
+        if not api_key:
+            warnings.warn("README_API_KEY env var is not set, using a placeholder category ID", stacklevel=2)
             return {"haystack-classes": "ID"}
 
         headers = create_headers(version)
@@ -103,9 +101,9 @@ class ReadmeRenderer(Renderer):
             # we just return an empty string.
             return ""
 
-        README_API_KEY = os.getenv("README_API_KEY")
-        if not README_API_KEY:
-            warnings.warn("README_API_KEY env var is not set, using a placeholder doc ID")
+        api_key = os.getenv("README_API_KEY")
+        if not api_key:
+            warnings.warn("README_API_KEY env var is not set, using a placeholder doc ID", stacklevel=2)
             return "fake-doc-id"
 
         headers = create_headers(version)
@@ -120,7 +118,7 @@ class ReadmeRenderer(Renderer):
             sys.stdout.write(self._frontmatter())
             self.markdown.render_single_page(sys.stdout, modules)
         else:
-            with io.open(self.markdown.filename, "w", encoding=self.markdown.encoding) as fp:
+            with open(self.markdown.filename, "w", encoding=self.markdown.encoding) as fp:
                 fp.write(self._frontmatter())
                 self.markdown.render_single_page(t.cast(t.TextIO, fp), modules)
 
@@ -138,7 +136,8 @@ class ReadmeRenderer(Renderer):
 @dataclasses.dataclass
 class ReadmePreviewRenderer(ReadmeRenderer):
     """
-    This custom Renderer behaves just like the ReadmeRenderer but renders docs with the hardcoded version 2.0 to generate correct category ids.
+    This custom Renderer behaves just like the ReadmeRenderer but renders docs with the hardcoded
+    version 2.0 to generate correct category ids.
     """
 
     def _doc_version(self) -> str:

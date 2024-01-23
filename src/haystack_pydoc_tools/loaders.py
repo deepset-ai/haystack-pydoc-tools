@@ -2,8 +2,8 @@ import copy
 import typing as t
 
 import docspec
-from pydoc_markdown.interfaces import Context
 from pydoc_markdown.contrib.loaders.python import PythonLoader
+from pydoc_markdown.interfaces import Context
 
 
 class CustomPythonLoader(PythonLoader):
