@@ -79,7 +79,10 @@ class ReadmeRenderer(Renderer):
         api_key = os.getenv("README_API_KEY")
         if not api_key:
             warnings.warn("README_API_KEY env var is not set, using a placeholder category ID", stacklevel=2)
-            return {"haystack-classes": "ID"}
+            return {
+                "haystack-classes": "ID1",
+                "haystack-integrations": "ID2",
+            }
 
         headers = create_headers(version)
 
