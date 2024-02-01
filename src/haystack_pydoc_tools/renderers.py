@@ -86,7 +86,7 @@ class ReadmeRenderer(Renderer):
 
         headers = create_headers(version)
 
-        res = requests.get("https://dash.readme.com/api/v1/categories", headers=headers, timeout=60)
+        res = requests.get("https://dash.readme.com/api/v1/categories?perPage=100", headers=headers, timeout=60)
 
         if not res.ok:
             sys.exit(f"Error requesting {version} categories")
