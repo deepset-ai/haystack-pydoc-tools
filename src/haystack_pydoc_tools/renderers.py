@@ -79,10 +79,7 @@ class ReadmeRenderer(Renderer):
         api_key = os.getenv("README_API_KEY")
         if not api_key:
             warnings.warn("README_API_KEY env var is not set, using a placeholder category ID", stacklevel=2)
-            return {
-                "haystack-classes": "ID1",
-                "haystack-integrations": "ID2",
-            }
+            return {}
 
         headers = create_headers(version)
 
@@ -128,7 +125,7 @@ class ReadmeRenderer(Renderer):
     def _frontmatter(self) -> str:
         return README_FRONTMATTER.format(
             title=self.title,
-            category=self.categories[self.category_slug],
+            category=self.categories.get(self.category_slug, f"placeholder-{self.category_slug}"),
             parent_doc=self._doc_id(self.parent_doc_slug, self.version),
             excerpt=self.excerpt,
             slug=self.slug,
