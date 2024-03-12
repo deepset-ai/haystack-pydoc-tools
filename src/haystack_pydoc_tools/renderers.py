@@ -1,13 +1,16 @@
 import base64
 import dataclasses
 import os
+import subprocess
 import sys
 import typing as t
 import warnings
 from pathlib import Path
+from typing import List, Optional
 
 import docspec
 import requests
+from packaging.version import Version
 from pydoc_markdown.contrib.renderers.markdown import MarkdownRenderer
 from pydoc_markdown.interfaces import Context, Renderer
 
@@ -145,3 +148,65 @@ class ReadmePreviewRenderer(ReadmeRenderer):
         Returns the hardcoded docs version 2.0.
         """
         return "v2.0"
+
+
+@dataclasses.dataclass
+class ReadmeCoreRenderer(ReadmeRenderer):
+    """
+    This custom Renderer behaves just like the ReadmeRenderer but gets the version from `hatch`.
+    This is meant to be used by the Haystack core repository.
+    """
+
+    def _doc_version(self) -> str:
+        """
+        Returns the docs version.
+        """
+        # We're assuming hatch is installed and working
+        res = subprocess.run(["hatch", "version"], capture_output=True, check=True)
+        res.check_returncode()
+        full_version = res.stdout.decode().strip()
+        major, minor = full_version.split(".")[:2]
+        if "rc0" in full_version:
+            return f"v{major}.{minor}-unstable"
+        return f"v{major}.{minor}"
+
+
+@dataclasses.dataclass
+class ReadmeIntegrationRenderer(ReadmeRenderer):
+    """
+    This custom Renderer behaves just like the ReadmeRenderer but get the latest stable Haystack version released.
+    This is meant to be used by the Haystack integration repository.
+    """
+
+    def _get_latest_stable_version(self, versions: List[Version]) -> Optional[Version]:
+        latest_version = None
+        for version in versions:
+            if version.pre or version.dev:
+                # Skip pre-releases, we only want stable ones
+                continue
+            if latest_version is None or version > latest_version:
+                latest_version = version
+        return latest_version
+
+    def _doc_version(self) -> str:
+        """
+        Returns the docs version.
+        """
+        # Get the Haystack data from PyPI
+        res = requests.get(
+            "https://pypi.org/simple/haystack-ai",
+            headers={"Accept": "application/vnd.pypi.simple.v1+json"},
+            timeout=30,
+        )
+        res.raise_for_status()
+
+        data = res.json()
+        versions = [Version(v) for v in data["versions"]]
+
+        latest_version = self._get_latest_stable_version(versions)
+        if latest_version is None:
+            msg = "No stable version found"
+            raise ValueError(msg)
+
+        major, minor = latest_version.major, latest_version.minor
+        return f"v{major}.{minor}"

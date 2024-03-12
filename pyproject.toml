@@ -25,7 +25,8 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "pydoc-markdown==4.8.2"
+  "pydoc-markdown==4.8.2",
+  "requests"
 ]
 
 [project.urls]
