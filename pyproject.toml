@@ -7,7 +7,7 @@ name = "haystack-pydoc-tools"
 dynamic = ["version"]
 description = 'Pydoc custom tools for Haystack docs'
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = "Apache-2.0"
 keywords = []
 authors = [
@@ -16,7 +16,6 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
@@ -26,7 +25,8 @@ classifiers = [
 ]
 dependencies = [
   "pydoc-markdown==4.8.2",
-  "requests"
+  "databind<4.5.0",
+  "requests",
 ]
 
 [project.urls]
@@ -55,7 +55,7 @@ cov = [
 ]
 
 [[tool.hatch.envs.all.matrix]]
-python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
+python = ["3.8", "3.9", "3.10", "3.11"]
 
 [tool.hatch.envs.lint]
 detached = true
