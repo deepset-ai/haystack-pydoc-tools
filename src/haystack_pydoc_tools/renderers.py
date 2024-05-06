@@ -59,7 +59,7 @@ class ReadmeRenderer(Renderer):
 
     def init(self, context: Context) -> None:
         self.markdown.init(context)
-        self.version = self._doc_version()
+        self.version = os.environ.get("PYDOC_TOOLS_HAYSTACK_DOC_VERSION", self._doc_version())
         self.categories = self._readme_categories(self.version)
 
     def _doc_version(self) -> str:
