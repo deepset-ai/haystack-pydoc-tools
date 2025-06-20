@@ -28,7 +28,7 @@ hidden: false
 
 DOCUSAURUS_FRONTMATTER = """---
 title: {title}
-id: {slug}
+id: {id}
 description: {description}
 ---
 
@@ -265,6 +265,6 @@ class DocusaurusRenderer(Renderer):
     def _frontmatter(self) -> str:
         return DOCUSAURUS_FRONTMATTER.format(
             title=self.title,
-            slug=self.slug,
+            id=self.id,
             description=self.description,
         )
