@@ -26,6 +26,14 @@ hidden: false
 
 """
 
+DOCUSAURUS_FRONTMATTER = """---
+title: {title}
+id: {id}
+description: {description}
+---
+
+"""
+
 
 def create_headers(version: str):
     # Utility function to create Readme.io headers.
@@ -210,3 +218,53 @@ class ReadmeIntegrationRenderer(ReadmeRenderer):
 
         major, minor = latest_version.major, latest_version.minor
         return f"v{major}.{minor}"
+
+@dataclasses.dataclass
+class DocusaurusRenderer(Renderer):
+    """
+    This custom Renderer is heavily based on the `MarkdownRenderer`,
+    it just prepends a front matter so that the output can be published
+    directly to docusaurus.
+    """
+
+    # These settings will be used in the front matter output
+    title: str
+    id: str
+    description: str
+
+    # This exposes a special `markdown` settings value that can be used to pass
+    # parameters to the underlying `MarkdownRenderer`
+    markdown: MarkdownRenderer = dataclasses.field(default_factory=MarkdownRenderer)
+
+    def init(self, context: Context) -> None:
+        self.markdown.init(context)
+        self.version = os.environ.get("PYDOC_TOOLS_HAYSTACK_DOC_VERSION", self._doc_version())
+
+    def _doc_version(self) -> str:
+        """
+        Returns the docs version.
+        """
+        # We're assuming hatch is installed and working
+        res = subprocess.run(["hatch", "version"], capture_output=True, check=True)
+        res.check_returncode()
+        full_version = res.stdout.decode().strip()
+        major, minor = full_version.split(".")[:2]
+        if "rc0" in full_version:
+            return f"v{major}.{minor}-unstable"
+        return f"v{major}.{minor}"
+
+    def render(self, modules: t.List[docspec.Module]) -> None:
+        if self.markdown.filename is None:
+            sys.stdout.write(self._frontmatter())
+            self.markdown.render_single_page(sys.stdout, modules)
+        else:
+            with open(self.markdown.filename, "w", encoding=self.markdown.encoding) as fp:
+                fp.write(self._frontmatter())
+                self.markdown.render_single_page(t.cast(t.TextIO, fp), modules)
+
+    def _frontmatter(self) -> str:
+        return DOCUSAURUS_FRONTMATTER.format(
+            title=self.title,
+            id=self.id,
+            description=self.description,
+        )
