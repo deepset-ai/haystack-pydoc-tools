@@ -27,9 +27,10 @@ hidden: false
 """
 
 DOCUSAURUS_FRONTMATTER = """---
-title: {title}
+title: "{title}"
 id: {id}
-description: {description}
+description: "{description}"
+slug: "/{id}"
 ---
 
 """
