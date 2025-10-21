@@ -238,6 +238,16 @@ class DocusaurusRenderer(Renderer):
     markdown: MarkdownRenderer = dataclasses.field(default_factory=MarkdownRenderer)
 
     def init(self, context: Context) -> None:
+        # Set fixed header levels for Docusaurus (downgrade all headings by +1)
+        # This ensures Module starts at h2, Class at h3, Method/Function at h4
+        self.markdown.use_fixed_header_levels = True
+        self.markdown.header_level_by_type = {
+            "Module": 2,
+            "Class": 3,
+            "Method": 4,
+            "Function": 4,
+            "Data": 4,
+        }
         self.markdown.init(context)
 
     def render(self, modules: t.List[docspec.Module]) -> None:
