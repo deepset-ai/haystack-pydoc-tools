@@ -239,20 +239,6 @@ class DocusaurusRenderer(Renderer):
 
     def init(self, context: Context) -> None:
         self.markdown.init(context)
-        self.version = os.environ.get("PYDOC_TOOLS_HAYSTACK_DOC_VERSION", self._doc_version())
-
-    def _doc_version(self) -> str:
-        """
-        Returns the docs version.
-        """
-        # We're assuming hatch is installed and working
-        res = subprocess.run(["hatch", "version"], capture_output=True, check=True)
-        res.check_returncode()
-        full_version = res.stdout.decode().strip()
-        major, minor = full_version.split(".")[:2]
-        if "rc0" in full_version:
-            return f"v{major}.{minor}-unstable"
-        return f"v{major}.{minor}"
 
     def render(self, modules: t.List[docspec.Module]) -> None:
         if self.markdown.filename is None:
