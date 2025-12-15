@@ -12,9 +12,10 @@ class CustomPythonLoader(PythonLoader):
         Load the modules, but include inherited methods in the classes.
         """
         # Load all haystack modules
+        # Sort by module name to ensure deterministic ordering across different filesystems
         temp_loader = PythonLoader(search_path=["../../../haystack"])
         temp_loader.init(Context(directory="."))
-        all_modules = list(temp_loader.load())
+        all_modules = sorted(temp_loader.load(), key=lambda m: m.name)
 
         # Collect all classes
         classes = {}
@@ -24,7 +25,8 @@ class CustomPythonLoader(PythonLoader):
                     classes[member.name] = member
 
         # Load the modules specified in the search path
-        modules = super().load()
+        # Sort by module name to ensure deterministic ordering across different filesystems
+        modules = sorted(super().load(), key=lambda m: m.name)
 
         # Add inherited methods to the classes
         modules = self.include_inherited_methods(modules, classes)
