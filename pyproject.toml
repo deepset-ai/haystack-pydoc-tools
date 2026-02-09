@@ -28,7 +28,7 @@ dependencies = [
   "pydoc-markdown==4.8.2",
   "databind<4.5.0",
   "requests",
-  "setuptools",
+  "setuptools==81.0.0",
 ]
 
 [project.urls]
