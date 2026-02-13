@@ -1,0 +1,30 @@
+name: Tests
+
+on:
+  workflow_dispatch: # Activate this workflow manually
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  tests:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Install Hatch
+        id: hatch
+        shell: bash
+        run: pip install -U hatch
+
+      - name: Run
+        run: hatch run test
