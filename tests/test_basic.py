@@ -23,7 +23,4 @@ def test_can_build_preprocessors_api(cleanup_files):
     with open("tests/test_files/preprocessors_api_output.md", "r") as f:
         expected_content = f.read()
 
-    print(len(content))
-    print(len(expected_content))
-
     assert content == expected_content
