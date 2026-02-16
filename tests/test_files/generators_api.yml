@@ -1,8 +1,11 @@
 loaders:
   - type: haystack_pydoc_tools.loaders.CustomPythonLoader
-    search_path: [components]
-    modules: [
-      "document_splitter"]
+    search_path: [components/generators]
+    modules:
+      [
+        "chat/azure",
+        "chat/openai",
+      ]
     ignore_when_discovered: ["__init__"]
 processors:
   - type: filter
@@ -14,13 +17,13 @@ processors:
   - type: crossref
 renderer:
   type: haystack_pydoc_tools.renderers.DocusaurusRenderer
-  description: Preprocess your Documents and texts. Clean, split, and more.
-  title: PreProcessors
-  id: preprocessors-api
+  description: Enables text generation using LLMs.
+  title: Generators
+  id: generators-api
   markdown:
     descriptive_class_title: false
     classdef_code_block: false
     descriptive_module_title: true
     add_method_class_prefix: true
     add_member_class_prefix: false
-    filename: preprocessors_api.md
+    filename: generators_api.md
