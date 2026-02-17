@@ -27,11 +27,15 @@ def load_modules(search_path: str, modules: list[str]) -> list[Module]:
     (such as Haystack Core Integrations).
 
     :param search_path: Filesystem path to the source root (e.g. "../src").
-    :param modules: Fully-qualified dotted module names.
+    :param modules: Module names (dotted or slash-separated) relative to search_path.
     :returns: Loaded griffe Module objects, in alphabetical order.
     """
     root = Path(search_path).resolve()
     extensions = Extensions(DataclassesVisitorExtension())
+
+    # If root is a proper package, provide parent context so griffe doesn't confuse
+    # module names (e.g. "dataclasses") with stdlib modules of the same name.
+    parent = Module(name=root.name, filepath=root) if (root / "__init__.py").is_file() else None
 
     results: list[Module] = []
     for module_name in sorted(modules):
@@ -41,8 +45,15 @@ def load_modules(search_path: str, modules: list[str]) -> list[Module]:
         else:
             filepath = filepath.with_suffix(".py")
         mod = visit(
-            module_name, filepath=filepath, code=filepath.read_text(), docstring_parser="sphinx", extensions=extensions
+            module_name,
+            filepath=filepath,
+            code=filepath.read_text(),
+            docstring_parser="sphinx",
+            extensions=extensions,
+            parent=parent,
         )
+        # Detach from parent so the module path stays short for rendering
+        mod.parent = None
         results.append(mod)
 
     return results
