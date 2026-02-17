@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import griffe
+
 from haystack_pydoc_tools.loaders import load_modules
 
 TEST_FILES = Path(__file__).parent / "test_files"
