@@ -4,7 +4,6 @@ from pathlib import Path
 import pytest
 
 TEST_CONFIG = str(Path(__file__).parent / "test_files" / "generators_api.yml")
-EXPECTED_OUTPUT = Path(__file__).parent / "test_files" / "expected_generators_api.md"
 
 
 def test_directory_mode(tmp_path):
@@ -25,8 +24,11 @@ def test_pydoc_markdown_alias(tmp_path):
     assert len(files) == 1
 
 
-def test_output_matches_expected(tmp_path):
-    subprocess.run(["haystack-pydoc", TEST_CONFIG, str(tmp_path)], check=True)
+@pytest.mark.parametrize(
+    "config", [TEST_CONFIG, str(Path(__file__).parent / "test_files" / "simpler_generators_api.yml")]
+)
+def test_output_matches_expected(tmp_path, config):
+    subprocess.run(["haystack-pydoc", config, str(tmp_path)], check=True)
     content = (tmp_path / "generators_api.md").read_text()
-    expected = EXPECTED_OUTPUT.read_text()
+    expected = (Path(__file__).parent / "test_files" / "expected_generators_api.md").read_text()
     assert content == expected

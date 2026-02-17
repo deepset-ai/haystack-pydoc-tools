@@ -9,7 +9,7 @@ from haystack_pydoc_tools.renderers import render_docusaurus
 
 
 def process_config(config_path: str, output_dir: str | None = None) -> None:
-    """Process a single YAML config file and generate Markdown API docs."""
+    """Process a single YAML config file and generate Markdown API references."""
     with open(config_path, encoding="utf-8") as f:
         config = yaml.safe_load(f)
 

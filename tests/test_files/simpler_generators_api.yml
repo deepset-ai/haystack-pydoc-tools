@@ -1,0 +1,10 @@
+loaders:
+  - search_path: [components/generators]
+    modules:
+      - chat/azure
+      - chat/openai
+renderer:
+  title: Generators
+  id: generators-api
+  description: Enables text generation using LLMs.
+  filename: generators_api.md
