@@ -1,65 +1,30 @@
-import copy
-import typing as t
+from pathlib import Path
 
-import docspec
-from pydoc_markdown.contrib.loaders.python import PythonLoader
-from pydoc_markdown.interfaces import Context
+from griffe import Module, load
 
 
-class CustomPythonLoader(PythonLoader):
-    def load(self) -> t.Iterable[docspec.Module]:
-        """
-        Load the modules, but include inherited methods in the classes.
-        """
-        # Load all haystack modules
-        # Sort by module name to ensure deterministic ordering across different filesystems
-        temp_loader = PythonLoader(search_path=["../../../haystack"])
-        temp_loader.init(Context(directory="."))
-        all_modules = sorted(temp_loader.load(), key=lambda m: m.name)
+def load_modules(search_path: str, modules: list[str]) -> list[Module]:
+    """
+    Load Python modules using griffe.
 
-        # Collect all classes
-        classes = {}
-        for module in all_modules:
-            for member in module.members:
-                if isinstance(member, docspec.Class):
-                    classes[member.name] = member
+    :param search_path: Filesystem path to a subpackage directory (e.g. ".../haystack/components/generators").
+    :param modules: Module names as slash-separated paths relative to search_path (e.g. "chat/azure").
+    :returns: Loaded griffe Module objects, in alphabetical order.
+    """
+    # griffe.load() needs a fully-qualified dotted name and a search path to the top-level package.
+    # Walk up through __init__.py parents to find the package root.
+    resolved = Path(search_path).resolve()
+    package_root = resolved
+    while (package_root.parent / "__init__.py").exists():
+        package_root = package_root.parent
+    package_root = package_root.parent
+    base_package = ".".join(resolved.relative_to(package_root).parts)
 
-        # Load the modules specified in the search path
-        # Sort by module name to ensure deterministic ordering across different filesystems
-        modules = sorted(super().load(), key=lambda m: m.name)
+    results: list[Module] = []
+    for module_name in sorted(modules):
+        dotted_name = module_name.replace("/", ".")
+        full_module = f"{base_package}.{dotted_name}"
+        mod = load(full_module, search_paths=[str(package_root)], docstring_parser="sphinx")
+        results.append(mod)
 
-        # Add inherited methods to the classes
-        modules = self.include_inherited_methods(modules, classes)
-
-        return modules
-
-    def include_inherited_methods(
-        self, modules: t.Iterable[docspec.Module], classes: t.Dict[str, docspec.Class]
-    ) -> t.Iterable[docspec.Module]:
-        """
-        Recursively include inherited methods from the base classes.
-        """
-        modules = list(modules)
-        for module in modules:
-            for cls in module.members:
-                if isinstance(cls, docspec.Class):
-                    self.include_methods_for_class(cls, classes)
-
-        return modules
-
-    def include_methods_for_class(self, cls: docspec.Class, classes: t.Dict[str, docspec.Class]):
-        """
-        Include all methods inherited from base classes to the class.
-        """
-        if cls.bases is None:
-            return
-        for base in cls.bases:
-            if base in classes:
-                base_cls = classes[base]
-                self.include_methods_for_class(base_cls, classes)
-
-                for member in base_cls.members:
-                    if isinstance(member, docspec.Function) and not any(m.name == member.name for m in cls.members):
-                        new_member = copy.deepcopy(member)
-                        new_member.parent = cls
-                        cls.members.append(new_member)
+    return results

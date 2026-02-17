@@ -7,7 +7,7 @@ name = "haystack-pydoc-tools"
 dynamic = ["version"]
 description = 'Pydoc custom tools for Haystack docs'
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = "Apache-2.0"
 keywords = []
 authors = [
@@ -25,11 +25,15 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "pydoc-markdown==4.8.2",
-  "databind<4.5.0",
-  "requests",
-  "setuptools==81.0.0",
+  "griffe",
+  "griffe2md",
+  "pyyaml",
+  "black", # black is used for formatting the code by griffe2md. Do not remove it.
 ]
+
+[project.scripts]
+haystack-pydoc = "haystack_pydoc_tools.cli:main"
+pydoc-markdown = "haystack_pydoc_tools.cli:main"
 
 [project.urls]
 Documentation = "https://github.com/unknown/haystack-pydoc-tools#readme"
@@ -138,7 +142,7 @@ exclude_lines = [
 
 [[tool.mypy.overrides]]
 module = [
-  "pydoc_markdown.*",
-  "docspec.*",
+  "griffe.*",
+  "griffe2md.*",
 ]
 ignore_missing_imports = true
