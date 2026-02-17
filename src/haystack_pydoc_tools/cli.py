@@ -22,9 +22,9 @@ def process_config(config_path: str, output_dir: str | None = None) -> None:
 
     # Extract renderer config
     renderer_config = config["renderer"]
-    filename = renderer_config.get("filename") or renderer_config.get("markdown", {}).get("filename")
+    filename = renderer_config.get("filename") or renderer_config["markdown"]["filename"]
 
-    if filename and output_dir:
+    if output_dir:
         filename = str(Path(output_dir) / Path(filename).name)
 
     # Extract processor settings

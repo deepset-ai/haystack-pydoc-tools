@@ -1,5 +1,4 @@
 import re
-import sys
 from pathlib import Path
 
 from griffe import Module
@@ -67,11 +66,11 @@ def render_docusaurus(  # noqa: PLR0913
     title: str,
     doc_id: str,
     description: str,
-    filename: str | None = None,
+    filename: str,
     show_if_no_docstring: bool = False,
     skip_empty_modules: bool = True,
 ) -> None:
-    """Render griffe modules to Docusaurus-compatible Markdown and write to file or stdout."""
+    """Render griffe modules to Docusaurus-compatible Markdown and write to file."""
     config = {**GRIFFE2MD_DEFAULT_CONFIG, "show_if_no_docstring": show_if_no_docstring}
 
     parts = [DOCUSAURUS_FRONTMATTER.format(title=title, id=doc_id, description=description)]
@@ -86,7 +85,4 @@ def render_docusaurus(  # noqa: PLR0913
     # Remove anchor-only markdown links (not proper URLs)
     output = ANCHOR_LINK_RE.sub(r"\1", output)
 
-    if filename:
-        Path(filename).write_text(output, encoding="utf-8")
-    else:
-        sys.stdout.write(output)
+    Path(filename).write_text(output, encoding="utf-8")
