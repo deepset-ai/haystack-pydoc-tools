@@ -6,7 +6,7 @@ slug: "/generators-api"
 ---
 
 
-## `components.generators.chat.azure`
+## `chat/azure`
 
 ### `AzureOpenAIChatGenerator`
 
@@ -178,7 +178,7 @@ Deserialize this component from a dictionary.
 
 - <code>AzureOpenAIChatGenerator</code> – The deserialized component instance.
 
-## `components.generators.chat.openai`
+## `chat/openai`
 
 ### `OpenAIChatGenerator`
 
