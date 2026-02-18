@@ -58,6 +58,7 @@ slug: "/{id}"
 """
 
 ANCHOR_LINK_RE = re.compile(r"\[([^\]]+)\]\(#[^)]+\)")
+HEADING_BACKTICKS_RE = re.compile(r"^(#{1,6}) `(.+?)`$", re.MULTILINE)
 
 
 def render_docusaurus(  # noqa: PLR0913
@@ -81,6 +82,9 @@ def render_docusaurus(  # noqa: PLR0913
             parts.append(rendered)
 
     output = "\n".join(parts)
+
+    # Remove backticks wrapping headers (hardcoded in griffe2md)
+    output = HEADING_BACKTICKS_RE.sub(r"\1 \2", output)
 
     # Remove anchor-only markdown links (not proper URLs)
     output = ANCHOR_LINK_RE.sub(r"\1", output)

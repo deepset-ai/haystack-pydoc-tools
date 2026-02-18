@@ -6,9 +6,9 @@ slug: "/generators-api"
 ---
 
 
-## `chat/azure`
+## chat/azure
 
-### `AzureOpenAIChatGenerator`
+### AzureOpenAIChatGenerator
 
 Bases: <code>OpenAIChatGenerator</code>
 
@@ -54,7 +54,7 @@ print(response)
 }
 ```
 
-#### `__init__`
+#### __init__
 
 ```python
 __init__(
@@ -139,7 +139,7 @@ Initialize the Azure OpenAI Chat Generator component.
 - **http_client_kwargs** (<code>dict\[str, Any\] | None</code>) – A dictionary of keyword arguments to configure a custom `httpx.Client`or `httpx.AsyncClient`.
   For more information, see the [HTTPX documentation](https://www.python-httpx.org/api/#client).
 
-#### `warm_up`
+#### warm_up
 
 ```python
 warm_up()
@@ -150,7 +150,7 @@ Warm up the Azure OpenAI chat generator.
 This will warm up the tools registered in the chat generator.
 This method is idempotent and will only warm up the tools once.
 
-#### `to_dict`
+#### to_dict
 
 ```python
 to_dict() -> dict[str, Any]
@@ -162,7 +162,7 @@ Serialize this component to a dictionary.
 
 - <code>dict\[str, Any\]</code> – The serialized component as a dictionary.
 
-#### `from_dict`
+#### from_dict
 
 ```python
 from_dict(data: dict[str, Any]) -> AzureOpenAIChatGenerator
@@ -178,9 +178,9 @@ Deserialize this component from a dictionary.
 
 - <code>AzureOpenAIChatGenerator</code> – The deserialized component instance.
 
-## `chat/openai`
+## chat/openai
 
-### `OpenAIChatGenerator`
+### OpenAIChatGenerator
 
 Completes chats using OpenAI's large language models (LLMs).
 
@@ -224,7 +224,7 @@ Output:
 }
 ```
 
-#### `__init__`
+#### __init__
 
 ```python
 __init__(
@@ -300,7 +300,7 @@ in the OpenAI client.
 - **http_client_kwargs** (<code>dict\[str, Any\] | None</code>) – A dictionary of keyword arguments to configure a custom `httpx.Client`or `httpx.AsyncClient`.
   For more information, see the [HTTPX documentation](https://www.python-httpx.org/api/#client).
 
-#### `warm_up`
+#### warm_up
 
 ```python
 warm_up()
@@ -311,7 +311,7 @@ Warm up the OpenAI chat generator.
 This will warm up the tools registered in the chat generator.
 This method is idempotent and will only warm up the tools once.
 
-#### `to_dict`
+#### to_dict
 
 ```python
 to_dict() -> dict[str, Any]
@@ -323,7 +323,7 @@ Serialize this component to a dictionary.
 
 - <code>dict\[str, Any\]</code> – The serialized component as a dictionary.
 
-#### `from_dict`
+#### from_dict
 
 ```python
 from_dict(data: dict[str, Any]) -> OpenAIChatGenerator
@@ -339,7 +339,7 @@ Deserialize this component from a dictionary.
 
 - <code>OpenAIChatGenerator</code> – The deserialized component instance.
 
-#### `run`
+#### run
 
 ```python
 run(
@@ -372,7 +372,7 @@ Invokes chat completion based on the provided messages and generation parameters
 - <code>dict\[str, list\[ChatMessage\]\]</code> – A dictionary with the following key:
 - `replies`: A list containing the generated responses as ChatMessage instances.
 
-#### `run_async`
+#### run_async
 
 ```python
 run_async(
