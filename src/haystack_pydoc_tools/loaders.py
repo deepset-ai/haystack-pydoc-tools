@@ -1,65 +1,59 @@
-import copy
-import typing as t
+from pathlib import Path
+from typing import Any
 
-import docspec
-from pydoc_markdown.contrib.loaders.python import PythonLoader
-from pydoc_markdown.interfaces import Context
+from griffe import DataclassesExtension, Extension, Extensions, Module, visit
 
 
-class CustomPythonLoader(PythonLoader):
-    def load(self) -> t.Iterable[docspec.Module]:
-        """
-        Load the modules, but include inherited methods in the classes.
-        """
-        # Load all haystack modules
-        # Sort by module name to ensure deterministic ordering across different filesystems
-        temp_loader = PythonLoader(search_path=["../../../haystack"])
-        temp_loader.init(Context(directory="."))
-        all_modules = sorted(temp_loader.load(), key=lambda m: m.name)
+class DataclassesVisitorExtension(Extension):
+    """
+    Synthesize __init__ for dataclasses when using visit().
 
-        # Collect all classes
-        classes = {}
-        for module in all_modules:
-            for member in module.members:
-                if isinstance(member, docspec.Class):
-                    classes[member.name] = member
+    griffe's built-in DataclassesExtension only hooks on_package (loader), so it doesn't run with visit().
+    This extension hooks on_module_members (called by the visitor) and delegates to the same logic.
+    """
 
-        # Load the modules specified in the search path
-        # Sort by module name to ensure deterministic ordering across different filesystems
-        modules = sorted(super().load(), key=lambda m: m.name)
+    def __init__(self) -> None:
+        self._inner = DataclassesExtension()
 
-        # Add inherited methods to the classes
-        modules = self.include_inherited_methods(modules, classes)
+    def on_module_members(self, *, mod: Module, **kwargs: Any) -> None:  # noqa: ARG002, D102
+        self._inner.on_package(pkg=mod)
 
-        return modules
 
-    def include_inherited_methods(
-        self, modules: t.Iterable[docspec.Module], classes: t.Dict[str, docspec.Class]
-    ) -> t.Iterable[docspec.Module]:
-        """
-        Recursively include inherited methods from the base classes.
-        """
-        modules = list(modules)
-        for module in modules:
-            for cls in module.members:
-                if isinstance(cls, docspec.Class):
-                    self.include_methods_for_class(cls, classes)
+def load_modules(search_path: str, modules: list[str]) -> list[Module]:
+    """
+    Load Python modules using griffe.
 
-        return modules
+    Uses griffe.visit() to parse source files directly, which also works with namespace packages
+    (such as Haystack Core Integrations).
 
-    def include_methods_for_class(self, cls: docspec.Class, classes: t.Dict[str, docspec.Class]):
-        """
-        Include all methods inherited from base classes to the class.
-        """
-        if cls.bases is None:
-            return
-        for base in cls.bases:
-            if base in classes:
-                base_cls = classes[base]
-                self.include_methods_for_class(base_cls, classes)
+    :param search_path: Filesystem path to the source root (e.g. "../src").
+    :param modules: Module names (dotted or slash-separated) relative to search_path.
+    :returns: Loaded griffe Module objects, in alphabetical order.
+    """
+    root = Path(search_path).resolve()
+    extensions = Extensions(DataclassesVisitorExtension())
 
-                for member in base_cls.members:
-                    if isinstance(member, docspec.Function) and not any(m.name == member.name for m in cls.members):
-                        new_member = copy.deepcopy(member)
-                        new_member.parent = cls
-                        cls.members.append(new_member)
+    # If root is a proper package, provide parent context so griffe doesn't confuse
+    # module names (e.g. "dataclasses") with stdlib modules of the same name.
+    parent = Module(name=root.name, filepath=root) if (root / "__init__.py").is_file() else None
+
+    results: list[Module] = []
+    for module_name in sorted(modules):
+        filepath = root / module_name.replace(".", "/")
+        if (filepath / "__init__.py").is_file():
+            filepath = filepath / "__init__.py"
+        else:
+            filepath = filepath.with_suffix(".py")
+        mod = visit(
+            module_name,
+            filepath=filepath,
+            code=filepath.read_text(),
+            docstring_parser="sphinx",
+            extensions=extensions,
+            parent=parent,
+        )
+        # Detach from parent so the module path stays short for rendering
+        mod.parent = None
+        results.append(mod)
+
+    return results

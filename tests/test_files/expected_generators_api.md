@@ -5,13 +5,12 @@ description: "Enables text generation using LLMs."
 slug: "/generators-api"
 ---
 
-<a id="chat/azure"></a>
 
-## Module chat/azure
-
-<a id="chat/azure.AzureOpenAIChatGenerator"></a>
+## chat/azure
 
 ### AzureOpenAIChatGenerator
+
+Bases: <code>OpenAIChatGenerator</code>
 
 Generates text using OpenAI's models on Azure.
 
@@ -55,94 +54,95 @@ print(response)
 }
 ```
 
-<a id="chat/azure.AzureOpenAIChatGenerator.__init__"></a>
-
-#### AzureOpenAIChatGenerator.\_\_init\_\_
+#### __init__
 
 ```python
-def __init__(azure_endpoint: str | None = None,
-             api_version: str | None = "2024-12-01-preview",
-             azure_deployment: str | None = "gpt-4.1-mini",
-             api_key: Secret | None = Secret.from_env_var(
-                 "AZURE_OPENAI_API_KEY", strict=False),
-             azure_ad_token: Secret | None = Secret.from_env_var(
-                 "AZURE_OPENAI_AD_TOKEN", strict=False),
-             organization: str | None = None,
-             streaming_callback: StreamingCallbackT | None = None,
-             timeout: float | None = None,
-             max_retries: int | None = None,
-             generation_kwargs: dict[str, Any] | None = None,
-             default_headers: dict[str, str] | None = None,
-             tools: ToolsType | None = None,
-             tools_strict: bool = False,
-             *,
-             azure_ad_token_provider: AzureADTokenProvider
-             | AsyncAzureADTokenProvider | None = None,
-             http_client_kwargs: dict[str, Any] | None = None)
+__init__(
+    azure_endpoint: str | None = None,
+    api_version: str | None = "2024-12-01-preview",
+    azure_deployment: str | None = "gpt-4.1-mini",
+    api_key: Secret | None = Secret.from_env_var(
+        "AZURE_OPENAI_API_KEY", strict=False
+    ),
+    azure_ad_token: Secret | None = Secret.from_env_var(
+        "AZURE_OPENAI_AD_TOKEN", strict=False
+    ),
+    organization: str | None = None,
+    streaming_callback: StreamingCallbackT | None = None,
+    timeout: float | None = None,
+    max_retries: int | None = None,
+    generation_kwargs: dict[str, Any] | None = None,
+    default_headers: dict[str, str] | None = None,
+    tools: ToolsType | None = None,
+    tools_strict: bool = False,
+    *,
+    azure_ad_token_provider: (
+        AzureADTokenProvider | AsyncAzureADTokenProvider | None
+    ) = None,
+    http_client_kwargs: dict[str, Any] | None = None
+)
 ```
 
 Initialize the Azure OpenAI Chat Generator component.
 
-**Arguments**:
+**Parameters:**
 
-- `azure_endpoint`: The endpoint of the deployed model, for example `"https://example-resource.azure.openai.com/"`.
-- `api_version`: The version of the API to use. Defaults to 2024-12-01-preview.
-- `azure_deployment`: The deployment of the model, usually the model name.
-- `api_key`: The API key to use for authentication.
-- `azure_ad_token`: [Azure Active Directory token](https://www.microsoft.com/en-us/security/business/identity-access/microsoft-entra-id).
-- `organization`: Your organization ID, defaults to `None`. For help, see
-[Setting up your organization](https://platform.openai.com/docs/guides/production-best-practices/setting-up-your-organization).
-- `streaming_callback`: A callback function called when a new token is received from the stream.
-It accepts [StreamingChunk](https://docs.haystack.deepset.ai/docs/data-classes#streamingchunk)
-as an argument.
-- `timeout`: Timeout for OpenAI client calls. If not set, it defaults to either the
-`OPENAI_TIMEOUT` environment variable, or 30 seconds.
-- `max_retries`: Maximum number of retries to contact OpenAI after an internal error.
-If not set, it defaults to either the `OPENAI_MAX_RETRIES` environment variable, or set to 5.
-- `generation_kwargs`: Other parameters to use for the model. These parameters are sent directly to
-the OpenAI endpoint. For details, see [OpenAI documentation](https://platform.openai.com/docs/api-reference/chat).
-Some of the supported parameters:
+- **azure_endpoint** (<code>str | None</code>) – The endpoint of the deployed model, for example `"https://example-resource.azure.openai.com/"`.
+- **api_version** (<code>str | None</code>) – The version of the API to use. Defaults to 2024-12-01-preview.
+- **azure_deployment** (<code>str | None</code>) – The deployment of the model, usually the model name.
+- **api_key** (<code>Secret | None</code>) – The API key to use for authentication.
+- **azure_ad_token** (<code>Secret | None</code>) – [Azure Active Directory token](https://www.microsoft.com/en-us/security/business/identity-access/microsoft-entra-id).
+- **organization** (<code>str | None</code>) – Your organization ID, defaults to `None`. For help, see
+  [Setting up your organization](https://platform.openai.com/docs/guides/production-best-practices/setting-up-your-organization).
+- **streaming_callback** (<code>StreamingCallbackT | None</code>) – A callback function called when a new token is received from the stream.
+  It accepts [StreamingChunk](https://docs.haystack.deepset.ai/docs/data-classes#streamingchunk)
+  as an argument.
+- **timeout** (<code>float | None</code>) – Timeout for OpenAI client calls. If not set, it defaults to either the
+  `OPENAI_TIMEOUT` environment variable, or 30 seconds.
+- **max_retries** (<code>int | None</code>) – Maximum number of retries to contact OpenAI after an internal error.
+  If not set, it defaults to either the `OPENAI_MAX_RETRIES` environment variable, or set to 5.
+- **generation_kwargs** (<code>dict\[str, Any\] | None</code>) – Other parameters to use for the model. These parameters are sent directly to
+  the OpenAI endpoint. For details, see [OpenAI documentation](https://platform.openai.com/docs/api-reference/chat).
+  Some of the supported parameters:
 - `max_completion_tokens`: An upper bound for the number of tokens that can be generated for a completion,
-    including visible output tokens and reasoning tokens.
+  including visible output tokens and reasoning tokens.
 - `temperature`: The sampling temperature to use. Higher values mean the model takes more risks.
-    Try 0.9 for more creative applications and 0 (argmax sampling) for ones with a well-defined answer.
+  Try 0.9 for more creative applications and 0 (argmax sampling) for ones with a well-defined answer.
 - `top_p`: Nucleus sampling is an alternative to sampling with temperature, where the model considers
-    tokens with a top_p probability mass. For example, 0.1 means only the tokens comprising
-    the top 10% probability mass are considered.
+  tokens with a top_p probability mass. For example, 0.1 means only the tokens comprising
+  the top 10% probability mass are considered.
 - `n`: The number of completions to generate for each prompt. For example, with 3 prompts and n=2,
-    the LLM will generate two completions per prompt, resulting in 6 completions total.
+  the LLM will generate two completions per prompt, resulting in 6 completions total.
 - `stop`: One or more sequences after which the LLM should stop generating tokens.
 - `presence_penalty`: The penalty applied if a token is already present.
-    Higher values make the model less likely to repeat the token.
+  Higher values make the model less likely to repeat the token.
 - `frequency_penalty`: Penalty applied if a token has already been generated.
-    Higher values make the model less likely to repeat the token.
+  Higher values make the model less likely to repeat the token.
 - `logit_bias`: Adds a logit bias to specific tokens. The keys of the dictionary are tokens, and the
-    values are the bias to add to that token.
+  values are the bias to add to that token.
 - `response_format`: A JSON schema or a Pydantic model that enforces the structure of the model's response.
-    If provided, the output will always be validated against this
-    format (unless the model returns a tool call).
-    For details, see the [OpenAI Structured Outputs documentation](https://platform.openai.com/docs/guides/structured-outputs).
-    Notes:
-    - This parameter accepts Pydantic models and JSON schemas for latest models starting from GPT-4o.
-      Older models only support basic version of structured outputs through `{"type": "json_object"}`.
-      For detailed information on JSON mode, see the [OpenAI Structured Outputs documentation](https://platform.openai.com/docs/guides/structured-outputs#json-mode).
-    - For structured outputs with streaming,
-      the `response_format` must be a JSON schema and not a Pydantic model.
-- `default_headers`: Default headers to use for the AzureOpenAI client.
-- `tools`: A list of Tool and/or Toolset objects, or a single Toolset for which the model can prepare calls.
-- `tools_strict`: Whether to enable strict schema adherence for tool calls. If set to `True`, the model will follow exactly
-the schema provided in the `parameters` field of the tool definition, but this may increase latency.
-- `azure_ad_token_provider`: A function that returns an Azure Active Directory token, will be invoked on
-every request.
-- `http_client_kwargs`: A dictionary of keyword arguments to configure a custom `httpx.Client`or `httpx.AsyncClient`.
-For more information, see the [HTTPX documentation](https://www.python-httpx.org/api/`client`).
+  If provided, the output will always be validated against this
+  format (unless the model returns a tool call).
+  For details, see the [OpenAI Structured Outputs documentation](https://platform.openai.com/docs/guides/structured-outputs).
+  Notes:
+  - This parameter accepts Pydantic models and JSON schemas for latest models starting from GPT-4o.
+    Older models only support basic version of structured outputs through `{"type": "json_object"}`.
+    For detailed information on JSON mode, see the [OpenAI Structured Outputs documentation](https://platform.openai.com/docs/guides/structured-outputs#json-mode).
+  - For structured outputs with streaming,
+    the `response_format` must be a JSON schema and not a Pydantic model.
+- **default_headers** (<code>dict\[str, str\] | None</code>) – Default headers to use for the AzureOpenAI client.
+- **tools** (<code>ToolsType | None</code>) – A list of Tool and/or Toolset objects, or a single Toolset for which the model can prepare calls.
+- **tools_strict** (<code>bool</code>) – Whether to enable strict schema adherence for tool calls. If set to `True`, the model will follow exactly
+  the schema provided in the `parameters` field of the tool definition, but this may increase latency.
+- **azure_ad_token_provider** (<code>AzureADTokenProvider | AsyncAzureADTokenProvider | None</code>) – A function that returns an Azure Active Directory token, will be invoked on
+  every request.
+- **http_client_kwargs** (<code>dict\[str, Any\] | None</code>) – A dictionary of keyword arguments to configure a custom `httpx.Client`or `httpx.AsyncClient`.
+  For more information, see the [HTTPX documentation](https://www.python-httpx.org/api/#client).
 
-<a id="chat/azure.AzureOpenAIChatGenerator.warm_up"></a>
-
-#### AzureOpenAIChatGenerator.warm\_up
+#### warm_up
 
 ```python
-def warm_up()
+warm_up()
 ```
 
 Warm up the Azure OpenAI chat generator.
@@ -150,44 +150,35 @@ Warm up the Azure OpenAI chat generator.
 This will warm up the tools registered in the chat generator.
 This method is idempotent and will only warm up the tools once.
 
-<a id="chat/azure.AzureOpenAIChatGenerator.to_dict"></a>
-
-#### AzureOpenAIChatGenerator.to\_dict
+#### to_dict
 
 ```python
-def to_dict() -> dict[str, Any]
+to_dict() -> dict[str, Any]
 ```
 
 Serialize this component to a dictionary.
 
-**Returns**:
+**Returns:**
 
-The serialized component as a dictionary.
+- <code>dict\[str, Any\]</code> – The serialized component as a dictionary.
 
-<a id="chat/azure.AzureOpenAIChatGenerator.from_dict"></a>
-
-#### AzureOpenAIChatGenerator.from\_dict
+#### from_dict
 
 ```python
-@classmethod
-def from_dict(cls, data: dict[str, Any]) -> "AzureOpenAIChatGenerator"
+from_dict(data: dict[str, Any]) -> AzureOpenAIChatGenerator
 ```
 
 Deserialize this component from a dictionary.
 
-**Arguments**:
+**Parameters:**
 
-- `data`: The dictionary representation of this component.
+- **data** (<code>dict\[str, Any\]</code>) – The dictionary representation of this component.
 
-**Returns**:
+**Returns:**
 
-The deserialized component instance.
+- <code>AzureOpenAIChatGenerator</code> – The deserialized component instance.
 
-<a id="chat/openai"></a>
-
-## Module chat/openai
-
-<a id="chat/openai.OpenAIChatGenerator"></a>
+## chat/openai
 
 ### OpenAIChatGenerator
 
@@ -217,7 +208,9 @@ client = OpenAIChatGenerator()
 response = client.run(messages)
 print(response)
 ```
+
 Output:
+
 ```
 {'replies':
     [ChatMessage(_role=<ChatRole.ASSISTANT: 'assistant'>, _content=
@@ -231,22 +224,22 @@ Output:
 }
 ```
 
-<a id="chat/openai.OpenAIChatGenerator.__init__"></a>
-
-#### OpenAIChatGenerator.\_\_init\_\_
+#### __init__
 
 ```python
-def __init__(api_key: Secret = Secret.from_env_var("OPENAI_API_KEY"),
-             model: str = "gpt-5-mini",
-             streaming_callback: StreamingCallbackT | None = None,
-             api_base_url: str | None = None,
-             organization: str | None = None,
-             generation_kwargs: dict[str, Any] | None = None,
-             timeout: float | None = None,
-             max_retries: int | None = None,
-             tools: ToolsType | None = None,
-             tools_strict: bool = False,
-             http_client_kwargs: dict[str, Any] | None = None)
+__init__(
+    api_key: Secret = Secret.from_env_var("OPENAI_API_KEY"),
+    model: str = "gpt-5-mini",
+    streaming_callback: StreamingCallbackT | None = None,
+    api_base_url: str | None = None,
+    organization: str | None = None,
+    generation_kwargs: dict[str, Any] | None = None,
+    timeout: float | None = None,
+    max_retries: int | None = None,
+    tools: ToolsType | None = None,
+    tools_strict: bool = False,
+    http_client_kwargs: dict[str, Any] | None = None,
+)
 ```
 
 Creates an instance of OpenAIChatGenerator. Unless specified otherwise in `model`, uses OpenAI's gpt-5-mini
@@ -255,64 +248,62 @@ Before initializing the component, you can set the 'OPENAI_TIMEOUT' and 'OPENAI_
 environment variables to override the `timeout` and `max_retries` parameters respectively
 in the OpenAI client.
 
-**Arguments**:
+**Parameters:**
 
-- `api_key`: The OpenAI API key.
-You can set it with an environment variable `OPENAI_API_KEY`, or pass with this parameter
-during initialization.
-- `model`: The name of the model to use.
-- `streaming_callback`: A callback function that is called when a new token is received from the stream.
-The callback function accepts [StreamingChunk](https://docs.haystack.deepset.ai/docs/data-classes#streamingchunk)
-as an argument.
-- `api_base_url`: An optional base URL.
-- `organization`: Your organization ID, defaults to `None`. See
-[production best practices](https://platform.openai.com/docs/guides/production-best-practices/setting-up-your-organization).
-- `generation_kwargs`: Other parameters to use for the model. These parameters are sent directly to
-the OpenAI endpoint. See OpenAI [documentation](https://platform.openai.com/docs/api-reference/chat) for
-more details.
-Some of the supported parameters:
+- **api_key** (<code>Secret</code>) – The OpenAI API key.
+  You can set it with an environment variable `OPENAI_API_KEY`, or pass with this parameter
+  during initialization.
+- **model** (<code>str</code>) – The name of the model to use.
+- **streaming_callback** (<code>StreamingCallbackT | None</code>) – A callback function that is called when a new token is received from the stream.
+  The callback function accepts [StreamingChunk](https://docs.haystack.deepset.ai/docs/data-classes#streamingchunk)
+  as an argument.
+- **api_base_url** (<code>str | None</code>) – An optional base URL.
+- **organization** (<code>str | None</code>) – Your organization ID, defaults to `None`. See
+  [production best practices](https://platform.openai.com/docs/guides/production-best-practices/setting-up-your-organization).
+- **generation_kwargs** (<code>dict\[str, Any\] | None</code>) – Other parameters to use for the model. These parameters are sent directly to
+  the OpenAI endpoint. See OpenAI [documentation](https://platform.openai.com/docs/api-reference/chat) for
+  more details.
+  Some of the supported parameters:
 - `max_completion_tokens`: An upper bound for the number of tokens that can be generated for a completion,
-    including visible output tokens and reasoning tokens.
+  including visible output tokens and reasoning tokens.
 - `temperature`: What sampling temperature to use. Higher values mean the model will take more risks.
-    Try 0.9 for more creative applications and 0 (argmax sampling) for ones with a well-defined answer.
+  Try 0.9 for more creative applications and 0 (argmax sampling) for ones with a well-defined answer.
 - `top_p`: An alternative to sampling with temperature, called nucleus sampling, where the model
-    considers the results of the tokens with top_p probability mass. For example, 0.1 means only the tokens
-    comprising the top 10% probability mass are considered.
+  considers the results of the tokens with top_p probability mass. For example, 0.1 means only the tokens
+  comprising the top 10% probability mass are considered.
 - `n`: How many completions to generate for each prompt. For example, if the LLM gets 3 prompts and n is 2,
-    it will generate two completions for each of the three prompts, ending up with 6 completions in total.
+  it will generate two completions for each of the three prompts, ending up with 6 completions in total.
 - `stop`: One or more sequences after which the LLM should stop generating tokens.
 - `presence_penalty`: What penalty to apply if a token is already present at all. Bigger values mean
-    the model will be less likely to repeat the same token in the text.
+  the model will be less likely to repeat the same token in the text.
 - `frequency_penalty`: What penalty to apply if a token has already been generated in the text.
-    Bigger values mean the model will be less likely to repeat the same token in the text.
+  Bigger values mean the model will be less likely to repeat the same token in the text.
 - `logit_bias`: Add a logit bias to specific tokens. The keys of the dictionary are tokens, and the
-    values are the bias to add to that token.
+  values are the bias to add to that token.
 - `response_format`: A JSON schema or a Pydantic model that enforces the structure of the model's response.
-    If provided, the output will always be validated against this
-    format (unless the model returns a tool call).
-    For details, see the [OpenAI Structured Outputs documentation](https://platform.openai.com/docs/guides/structured-outputs).
-    Notes:
-    - This parameter accepts Pydantic models and JSON schemas for latest models starting from GPT-4o.
-      Older models only support basic version of structured outputs through `{"type": "json_object"}`.
-      For detailed information on JSON mode, see the [OpenAI Structured Outputs documentation](https://platform.openai.com/docs/guides/structured-outputs#json-mode).
-    - For structured outputs with streaming,
-      the `response_format` must be a JSON schema and not a Pydantic model.
-- `timeout`: Timeout for OpenAI client calls. If not set, it defaults to either the
-`OPENAI_TIMEOUT` environment variable, or 30 seconds.
-- `max_retries`: Maximum number of retries to contact OpenAI after an internal error.
-If not set, it defaults to either the `OPENAI_MAX_RETRIES` environment variable, or set to 5.
-- `tools`: A list of Tool and/or Toolset objects, or a single Toolset for which the model can prepare calls.
-- `tools_strict`: Whether to enable strict schema adherence for tool calls. If set to `True`, the model will follow exactly
-the schema provided in the `parameters` field of the tool definition, but this may increase latency.
-- `http_client_kwargs`: A dictionary of keyword arguments to configure a custom `httpx.Client`or `httpx.AsyncClient`.
-For more information, see the [HTTPX documentation](https://www.python-httpx.org/api/`client`).
+  If provided, the output will always be validated against this
+  format (unless the model returns a tool call).
+  For details, see the [OpenAI Structured Outputs documentation](https://platform.openai.com/docs/guides/structured-outputs).
+  Notes:
+  - This parameter accepts Pydantic models and JSON schemas for latest models starting from GPT-4o.
+    Older models only support basic version of structured outputs through `{"type": "json_object"}`.
+    For detailed information on JSON mode, see the [OpenAI Structured Outputs documentation](https://platform.openai.com/docs/guides/structured-outputs#json-mode).
+  - For structured outputs with streaming,
+    the `response_format` must be a JSON schema and not a Pydantic model.
+- **timeout** (<code>float | None</code>) – Timeout for OpenAI client calls. If not set, it defaults to either the
+  `OPENAI_TIMEOUT` environment variable, or 30 seconds.
+- **max_retries** (<code>int | None</code>) – Maximum number of retries to contact OpenAI after an internal error.
+  If not set, it defaults to either the `OPENAI_MAX_RETRIES` environment variable, or set to 5.
+- **tools** (<code>ToolsType | None</code>) – A list of Tool and/or Toolset objects, or a single Toolset for which the model can prepare calls.
+- **tools_strict** (<code>bool</code>) – Whether to enable strict schema adherence for tool calls. If set to `True`, the model will follow exactly
+  the schema provided in the `parameters` field of the tool definition, but this may increase latency.
+- **http_client_kwargs** (<code>dict\[str, Any\] | None</code>) – A dictionary of keyword arguments to configure a custom `httpx.Client`or `httpx.AsyncClient`.
+  For more information, see the [HTTPX documentation](https://www.python-httpx.org/api/#client).
 
-<a id="chat/openai.OpenAIChatGenerator.warm_up"></a>
-
-#### OpenAIChatGenerator.warm\_up
+#### warm_up
 
 ```python
-def warm_up()
+warm_up()
 ```
 
 Warm up the OpenAI chat generator.
@@ -320,86 +311,78 @@ Warm up the OpenAI chat generator.
 This will warm up the tools registered in the chat generator.
 This method is idempotent and will only warm up the tools once.
 
-<a id="chat/openai.OpenAIChatGenerator.to_dict"></a>
-
-#### OpenAIChatGenerator.to\_dict
+#### to_dict
 
 ```python
-def to_dict() -> dict[str, Any]
+to_dict() -> dict[str, Any]
 ```
 
 Serialize this component to a dictionary.
 
-**Returns**:
+**Returns:**
 
-The serialized component as a dictionary.
+- <code>dict\[str, Any\]</code> – The serialized component as a dictionary.
 
-<a id="chat/openai.OpenAIChatGenerator.from_dict"></a>
-
-#### OpenAIChatGenerator.from\_dict
+#### from_dict
 
 ```python
-@classmethod
-def from_dict(cls, data: dict[str, Any]) -> "OpenAIChatGenerator"
+from_dict(data: dict[str, Any]) -> OpenAIChatGenerator
 ```
 
 Deserialize this component from a dictionary.
 
-**Arguments**:
+**Parameters:**
 
-- `data`: The dictionary representation of this component.
+- **data** (<code>dict\[str, Any\]</code>) – The dictionary representation of this component.
 
-**Returns**:
+**Returns:**
 
-The deserialized component instance.
+- <code>OpenAIChatGenerator</code> – The deserialized component instance.
 
-<a id="chat/openai.OpenAIChatGenerator.run"></a>
-
-#### OpenAIChatGenerator.run
+#### run
 
 ```python
-@component.output_types(replies=list[ChatMessage])
-def run(messages: list[ChatMessage],
-        streaming_callback: StreamingCallbackT | None = None,
-        generation_kwargs: dict[str, Any] | None = None,
-        *,
-        tools: ToolsType | None = None,
-        tools_strict: bool | None = None) -> dict[str, list[ChatMessage]]
+run(
+    messages: list[ChatMessage],
+    streaming_callback: StreamingCallbackT | None = None,
+    generation_kwargs: dict[str, Any] | None = None,
+    *,
+    tools: ToolsType | None = None,
+    tools_strict: bool | None = None
+) -> dict[str, list[ChatMessage]]
 ```
 
 Invokes chat completion based on the provided messages and generation parameters.
 
-**Arguments**:
+**Parameters:**
 
-- `messages`: A list of ChatMessage instances representing the input messages.
-- `streaming_callback`: A callback function that is called when a new token is received from the stream.
-- `generation_kwargs`: Additional keyword arguments for text generation. These parameters will
-override the parameters passed during component initialization.
-For details on OpenAI API parameters, see [OpenAI documentation](https://platform.openai.com/docs/api-reference/chat/create).
-- `tools`: A list of Tool and/or Toolset objects, or a single Toolset for which the model can prepare calls.
-If set, it will override the `tools` parameter provided during initialization.
-- `tools_strict`: Whether to enable strict schema adherence for tool calls. If set to `True`, the model will follow exactly
-the schema provided in the `parameters` field of the tool definition, but this may increase latency.
-If set, it will override the `tools_strict` parameter set during component initialization.
+- **messages** (<code>list\[ChatMessage\]</code>) – A list of ChatMessage instances representing the input messages.
+- **streaming_callback** (<code>StreamingCallbackT | None</code>) – A callback function that is called when a new token is received from the stream.
+- **generation_kwargs** (<code>dict\[str, Any\] | None</code>) – Additional keyword arguments for text generation. These parameters will
+  override the parameters passed during component initialization.
+  For details on OpenAI API parameters, see [OpenAI documentation](https://platform.openai.com/docs/api-reference/chat/create).
+- **tools** (<code>ToolsType | None</code>) – A list of Tool and/or Toolset objects, or a single Toolset for which the model can prepare calls.
+  If set, it will override the `tools` parameter provided during initialization.
+- **tools_strict** (<code>bool | None</code>) – Whether to enable strict schema adherence for tool calls. If set to `True`, the model will follow exactly
+  the schema provided in the `parameters` field of the tool definition, but this may increase latency.
+  If set, it will override the `tools_strict` parameter set during component initialization.
 
-**Returns**:
+**Returns:**
 
-A dictionary with the following key:
+- <code>dict\[str, list\[ChatMessage\]\]</code> – A dictionary with the following key:
 - `replies`: A list containing the generated responses as ChatMessage instances.
 
-<a id="chat/openai.OpenAIChatGenerator.run_async"></a>
-
-#### OpenAIChatGenerator.run\_async
+#### run_async
 
 ```python
-@component.output_types(replies=list[ChatMessage])
-async def run_async(
-        messages: list[ChatMessage],
-        streaming_callback: StreamingCallbackT | None = None,
-        generation_kwargs: dict[str, Any] | None = None,
-        *,
-        tools: ToolsType | None = None,
-        tools_strict: bool | None = None) -> dict[str, list[ChatMessage]]
+run_async(
+    messages: list[ChatMessage],
+    streaming_callback: StreamingCallbackT | None = None,
+    generation_kwargs: dict[str, Any] | None = None,
+    *,
+    tools: ToolsType | None = None,
+    tools_strict: bool | None = None
+) -> dict[str, list[ChatMessage]]
 ```
 
 Asynchronously invokes chat completion based on the provided messages and generation parameters.
@@ -407,22 +390,21 @@ Asynchronously invokes chat completion based on the provided messages and genera
 This is the asynchronous version of the `run` method. It has the same parameters and return values
 but can be used with `await` in async code.
 
-**Arguments**:
+**Parameters:**
 
-- `messages`: A list of ChatMessage instances representing the input messages.
-- `streaming_callback`: A callback function that is called when a new token is received from the stream.
-Must be a coroutine.
-- `generation_kwargs`: Additional keyword arguments for text generation. These parameters will
-override the parameters passed during component initialization.
-For details on OpenAI API parameters, see [OpenAI documentation](https://platform.openai.com/docs/api-reference/chat/create).
-- `tools`: A list of Tool and/or Toolset objects, or a single Toolset for which the model can prepare calls.
-If set, it will override the `tools` parameter provided during initialization.
-- `tools_strict`: Whether to enable strict schema adherence for tool calls. If set to `True`, the model will follow exactly
-the schema provided in the `parameters` field of the tool definition, but this may increase latency.
-If set, it will override the `tools_strict` parameter set during component initialization.
+- **messages** (<code>list\[ChatMessage\]</code>) – A list of ChatMessage instances representing the input messages.
+- **streaming_callback** (<code>StreamingCallbackT | None</code>) – A callback function that is called when a new token is received from the stream.
+  Must be a coroutine.
+- **generation_kwargs** (<code>dict\[str, Any\] | None</code>) – Additional keyword arguments for text generation. These parameters will
+  override the parameters passed during component initialization.
+  For details on OpenAI API parameters, see [OpenAI documentation](https://platform.openai.com/docs/api-reference/chat/create).
+- **tools** (<code>ToolsType | None</code>) – A list of Tool and/or Toolset objects, or a single Toolset for which the model can prepare calls.
+  If set, it will override the `tools` parameter provided during initialization.
+- **tools_strict** (<code>bool | None</code>) – Whether to enable strict schema adherence for tool calls. If set to `True`, the model will follow exactly
+  the schema provided in the `parameters` field of the tool definition, but this may increase latency.
+  If set, it will override the `tools_strict` parameter set during component initialization.
 
-**Returns**:
+**Returns:**
 
-A dictionary with the following key:
+- <code>dict\[str, list\[ChatMessage\]\]</code> – A dictionary with the following key:
 - `replies`: A list containing the generated responses as ChatMessage instances.
-

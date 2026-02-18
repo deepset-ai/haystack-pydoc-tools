@@ -1,10 +1,52 @@
-import dataclasses
-import sys
-import typing as t
+import re
+from pathlib import Path
 
-import docspec
-from pydoc_markdown.contrib.renderers.markdown import MarkdownRenderer
-from pydoc_markdown.interfaces import Context, Renderer
+from griffe import Module
+from griffe2md import render_object_docs
+
+GRIFFE2MD_DEFAULT_CONFIG = {
+    # Heading structure
+    "heading_level": 2,
+    "show_root_heading": True,
+    "show_root_full_path": True,
+    "show_root_members_full_path": False,
+    "show_object_full_path": False,
+    # Signatures
+    "separate_signature": True,
+    "show_signature": True,
+    "show_signature_annotations": True,
+    "signature_crossrefs": False,
+    "line_length": 80,
+    # Members
+    "merge_init_into_class": False,
+    "inherited_members": True,
+    "filters": ["!^_", "^__init__$"],
+    "members": None,
+    "members_order": "source",
+    "group_by_category": False,
+    "show_submodules": False,
+    "show_bases": True,
+    "show_category_heading": False,
+    # Docstring rendering
+    "docstring_section_style": "list",
+    "show_docstring_attributes": True,
+    "show_docstring_description": True,
+    "show_docstring_examples": True,
+    "show_docstring_other_parameters": True,
+    "show_docstring_parameters": True,
+    "show_docstring_raises": True,
+    "show_docstring_receives": True,
+    "show_docstring_returns": True,
+    "show_docstring_warns": True,
+    "show_docstring_yields": True,
+    "show_docstring_classes": True,
+    "show_docstring_functions": True,
+    "show_docstring_modules": True,
+    # Display
+    "show_if_no_docstring": False,
+    "summary": False,
+    "annotations_path": "brief",
+}
 
 DOCUSAURUS_FRONTMATTER = """---
 title: "{title}"
@@ -15,40 +57,36 @@ slug: "/{id}"
 
 """
 
+ANCHOR_LINK_RE = re.compile(r"\[([^\]]+)\]\(#[^)]+\)")
+HEADING_BACKTICKS_RE = re.compile(r"^(#{1,6}) `(.+?)`$", re.MULTILINE)
 
-@dataclasses.dataclass
-class DocusaurusRenderer(Renderer):
-    """
-    This custom Renderer is heavily based on the `MarkdownRenderer`.
 
-    It just prepends a front matter so that the output can be published
-    directly to docusaurus.
-    """
+def render_docusaurus(  # noqa: PLR0913
+    modules: list[Module],
+    *,
+    title: str,
+    doc_id: str,
+    description: str,
+    filename: str,
+    show_if_no_docstring: bool = False,
+    skip_empty_modules: bool = True,
+) -> None:
+    """Render griffe modules to Docusaurus-compatible Markdown and write to file."""
+    config = {**GRIFFE2MD_DEFAULT_CONFIG, "show_if_no_docstring": show_if_no_docstring}
 
-    # These settings will be used in the front matter output
-    title: str
-    id: str
-    description: str
+    parts = [DOCUSAURUS_FRONTMATTER.format(title=title, id=doc_id, description=description)]
 
-    # This exposes a special `markdown` settings value that can be used to pass
-    # parameters to the underlying `MarkdownRenderer`
-    markdown: MarkdownRenderer = dataclasses.field(default_factory=MarkdownRenderer)
+    for module in modules:
+        rendered = render_object_docs(module, config, format_md=True)
+        if rendered.strip() or not skip_empty_modules:
+            parts.append(rendered)
 
-    def init(self, context: Context) -> None:  # noqa: D102
-        # Set fixed header levels for Docusaurus (downgrade all headings by +1)
-        # This ensures Module starts at h2, Class at h3, Method/Function at h4
-        self.markdown.use_fixed_header_levels = True
-        self.markdown.header_level_by_type = {"Module": 2, "Class": 3, "Method": 4, "Function": 4, "Data": 4}
-        self.markdown.init(context)
+    output = "\n".join(parts)
 
-    def render(self, modules: t.List[docspec.Module]) -> None:  # noqa: D102
-        if self.markdown.filename is None:
-            sys.stdout.write(self._frontmatter())
-            self.markdown.render_single_page(sys.stdout, modules)
-        else:
-            with open(self.markdown.filename, "w", encoding=self.markdown.encoding) as fp:
-                fp.write(self._frontmatter())
-                self.markdown.render_single_page(t.cast(t.TextIO, fp), modules)
+    # Remove backticks wrapping headers (hardcoded in griffe2md)
+    output = HEADING_BACKTICKS_RE.sub(r"\1 \2", output)
 
-    def _frontmatter(self) -> str:
-        return DOCUSAURUS_FRONTMATTER.format(title=self.title, id=self.id, description=self.description)
+    # Remove anchor-only markdown links (not proper URLs)
+    output = ANCHOR_LINK_RE.sub(r"\1", output)
+
+    Path(filename).write_text(output, encoding="utf-8")
