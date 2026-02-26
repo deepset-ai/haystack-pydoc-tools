@@ -22,7 +22,7 @@ jobs:
           python-version: "3.10"
 
       - name: Install Hatch
-        run: pip install -U hatch
+        uses: pypa/hatch@install
     
       - name: Ruff check
         run: hatch run fmt-check
